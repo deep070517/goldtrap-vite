@@ -1,8 +1,15 @@
 import { useState } from 'react'
+import emailjs from '@emailjs/browser'
 
 export default function Checkout({ product, onClose }) {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Initialize EmailJS (do this once)
+  if (!window.emailjsInitialized) {
+    emailjs.init('vTgQI6P-SBGPfzNop') // Your EmailJS User ID
+    window.emailjsInitialized = true
+  }
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
@@ -12,6 +19,24 @@ export default function Checkout({ product, onClose }) {
       script.onerror = () => resolve(false)
       document.body.appendChild(script)
     })
+  }
+
+  const sendEmail = async (licenseKey) => {
+    try {
+      await emailjs.send(
+        'service_2bd442h', // Your Service ID
+         'template_ccjsueg',  // Your Template ID (REPLACE THIS)
+        {
+          to_email: email,
+          product_name: product.name,
+          license_key: licenseKey
+        }
+      )
+      return true
+    } catch (error) {
+      console.error('Email error:', error)
+      return false
+    }
   }
 
   const handlePayment = async () => {
@@ -31,7 +56,7 @@ export default function Checkout({ product, onClose }) {
     }
 
     const options = {
-      key: 'rzp_test_1DP5MMOlF23ioQ', // REPLACE WITH YOUR LIVE KEY LATER
+      key: 'rzp_test_1DP5MMOlF23ioQ', // REPLACE WITH LIVE KEY LATER
       amount: product.price * 100,
       currency: 'INR',
       name: 'GoldTrap',
@@ -48,26 +73,13 @@ export default function Checkout({ product, onClose }) {
         // Generate License Key
         const licenseKey = `GT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
         
-        // Send Email with License Key
-        try {
-          const emailRes = await fetch('/api/send-ea', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to_email: email,
-              product_name: product.name,
-              license_key: licenseKey
-            })
-          })
+        // Send Email
+        const emailSent = await sendEmail(licenseKey)
 
-          if (emailRes.ok) {
-            alert(`✅ Payment Successful!\n📧 License key sent to ${email}\n\nLicense Key: ${licenseKey}`)
-          } else {
-            alert(`✅ Payment successful!\nLicense Key: ${licenseKey}\n\n📧 Email may take a moment to arrive.`)
-          }
-        } catch (error) {
-          console.error('Email error:', error)
-          alert(`✅ Payment successful!\nLicense Key: ${licenseKey}\n\nCheck your email shortly.`)
+        if (emailSent) {
+          alert(`✅ Payment Successful!\n📧 License key sent to ${email}\n\nLicense Key: ${licenseKey}`)
+        } else {
+          alert(`✅ Payment successful!\nLicense Key: ${licenseKey}\n\n📧 Email failed but check later.`)
         }
         
         setLoading(false)
@@ -113,7 +125,7 @@ export default function Checkout({ product, onClose }) {
             className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
             disabled={loading}
           />
-          <p className="text-xs text-gray-500 mt-1">📧 License key aur EA file yahan bhejungi</p>
+          <p className="text-xs text-gray-500 mt-1">📧 License key yahan bhejungi</p>
         </div>
 
         <button
@@ -121,7 +133,7 @@ export default function Checkout({ product, onClose }) {
           disabled={loading || !email}
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition mb-3"
         >
-          {loading ? '⏳ Loading Razorpay...' : `Proceed to Payment`}
+          {loading ? '⏳ Loading...' : `Pay ₹${product.price.toLocaleString('en-IN')}`}
         </button>
 
         <button
@@ -131,12 +143,6 @@ export default function Checkout({ product, onClose }) {
         >
           Cancel
         </button>
-
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-          <p className="text-xs text-blue-900">
-            <strong>🧪 Test Mode:</strong> Use 4111 1111 1111 1111, any future expiry, any CVV
-          </p>
-        </div>
       </div>
     </div>
   )
