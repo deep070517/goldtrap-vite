@@ -56,7 +56,7 @@ export default function Checkout({ product, onClose }) {
     }
 
     const options = {
-      key: 'rzp_test_1DP5MMOlF23ioQ', // REPLACE WITH LIVE KEY LATER
+      key: 'rzp_test_TKwDpLivaEudAQ', // REPLACE WITH LIVE KEY LATER
       amount: product.price * 100,
       currency: 'INR',
       name: 'GoldTrap',
