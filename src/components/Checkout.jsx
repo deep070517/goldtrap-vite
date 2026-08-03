@@ -25,7 +25,7 @@ export default function Checkout({ product, onClose }) {
     try {
       await emailjs.send(
         'service_2bd442h', // Your Service ID
-         'template_aeo8btm',  // Your Template ID (REPLACE THIS)
+         'template_asss',  // Your Template ID (REPLACE THIS)
         {
           to_email: email,
           product_name: product.name,
