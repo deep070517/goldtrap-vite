@@ -1,9 +1,9 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
   const navigate = useNavigate()
-
-  const reviews = [
+  const [reviews, setReviews] = useState([
     {
       name: 'Raj Kumar',
       role: 'Trader, Mumbai',
@@ -32,7 +32,31 @@ export default function Home() {
       text: 'Finally found a reliable EA! Makes automated trading so easy. Customer service is top-notch.',
       avatar: '👩‍🎓'
     }
-  ]
+  ])
+
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    role: '',
+    text: ''
+  })
+
+  const handleSubmitReview = (e) => {
+    e.preventDefault()
+    if (formData.name && formData.role && formData.text) {
+      const newReview = {
+        name: formData.name,
+        role: formData.role,
+        rating: 5,
+        text: formData.text,
+        avatar: '👤'
+      }
+      setReviews([newReview, ...reviews])
+      setFormData({ name: '', role: '', text: '' })
+      setShowReviewForm(false)
+      alert('✅ Thank you for your review! It will be displayed shortly.')
+    }
+  }
 
   const blogPosts = [
     {
@@ -132,10 +156,60 @@ export default function Home() {
 
       {/* Reviews Section */}
       <div className="max-w-5xl mx-auto px-4 py-16">
-        <h2 className="text-4xl font-bold text-center mb-12">What Users Say</h2>
+        <div className="flex justify-between items-center mb-12">
+          <h2 className="text-4xl font-bold">What Users Say</h2>
+          <button 
+            onClick={() => setShowReviewForm(!showReviewForm)}
+            className="bg-purple-600 px-6 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-bold"
+          >
+            {showReviewForm ? 'Cancel' : '+ Add Review'}
+          </button>
+        </div>
+
+        {/* Review Form */}
+        {showReviewForm && (
+          <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 p-8 rounded-lg border border-purple-500 mb-8">
+            <h3 className="text-2xl font-bold mb-6">Share Your Experience</h3>
+            <form onSubmit={handleSubmitReview}>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="px-4 py-2 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-purple-500 focus:outline-none"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Your Role (e.g., Trader, Mumbai)"
+                  value={formData.role}
+                  onChange={(e) => setFormData({...formData, role: e.target.value})}
+                  className="px-4 py-2 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-purple-500 focus:outline-none"
+                  required
+                />
+              </div>
+              <textarea
+                placeholder="Tell us about your experience with AuBot..."
+                value={formData.text}
+                onChange={(e) => setFormData({...formData, text: e.target.value})}
+                className="w-full px-4 py-2 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-purple-500 focus:outline-none mb-4 h-24"
+                required
+              />
+              <button 
+                type="submit"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-2 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition"
+              >
+                Submit Review
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Reviews Grid */}
         <div className="grid md:grid-cols-2 gap-8">
-          {reviews.map((review, idx) => (
-            <div key={idx} className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+          {reviews.slice(0, 4).map((review, idx) => (
+            <div key={idx} className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 hover:border-purple-500 transition">
               <div className="flex items-center gap-4 mb-4">
                 <div className="text-4xl">{review.avatar}</div>
                 <div>
@@ -152,6 +226,12 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        {reviews.length > 4 && (
+          <div className="text-center mt-8">
+            <p className="text-gray-400">Showing {Math.min(4, reviews.length)} of {reviews.length} reviews</p>
+          </div>
+        )}
       </div>
 
       {/* Trust Section */}
@@ -169,7 +249,7 @@ export default function Home() {
               <div className="bg-white/10 p-4 rounded-lg">
                 <p className="text-sm text-gray-300">Telegram Support</p>
                 <p className="text-lg font-bold">
-                  <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
+                  <a href="https://t.me/@AlgoMql5" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
                     @AlgoMql5
                   </a>
                 </p>
@@ -205,14 +285,10 @@ export default function Home() {
 
       {/* Stats Section */}
       <div className="max-w-5xl mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-4 gap-8 text-center">
+        <div className="grid md:grid-cols-3 gap-8 text-center">
           <div>
             <p className="text-4xl font-bold text-purple-400">500+</p>
             <p className="text-gray-300">Active Users</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-pink-400">₹2L+</p>
-            <p className="text-gray-300">Revenue Generated</p>
           </div>
           <div>
             <p className="text-4xl font-bold text-blue-400">98%</p>
